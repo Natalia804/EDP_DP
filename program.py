@@ -77,9 +77,7 @@ st.sidebar.title("Nawigacja")
 menu = st.sidebar.radio("Wybierz sekcję:", [
     "Wprowadzenie",
     "Prezentacja i opis danych",
-    "Budowa modelu",
-    "Weryfikacja modelu",
-    "Prezentacja ostatecznego modelu"
+    "Budowa modelu"
 ])
 
 # Globalne zmienne
@@ -467,7 +465,7 @@ elif menu == "Prezentacja i opis danych":
             fig_hist = px.histogram(
                 panel_df,
                 x=var_for_hist,
-                nbins=30,  # Możesz zmienić liczbę słupków
+                nbins=30,  
                 title=f"Histogram zmiennej {var_for_hist}"
             )
         else:
@@ -482,7 +480,7 @@ elif menu == "Prezentacja i opis danych":
  
         st.header("Trend w czasie / Fale badania")
 
-        # Przykład: średni dochód per fala
+    
         mean_income_by_wave = (
             panel_df.groupby("wave", as_index=False)["income_deflated"]
             .mean()
@@ -517,8 +515,8 @@ elif menu == "Prezentacja i opis danych":
 
         fig = px.box(
             panel_df,
-            x="profession",      # kategoria (zawód)
-            y="log_income_deflated",          # zmienna ciągła (dochód)
+            x="profession",      
+            y="log_income_deflated",      
             title="Dochód w zależności od zawodu (profession)"
         )
         st.plotly_chart(fig)
@@ -538,9 +536,11 @@ elif menu == "Budowa modelu":
             unique_counts = df.groupby(group_col)[var].nunique()
             variability[var] = unique_counts.gt(1).any()
         return variability
+    
     # standaryzacja
     scaler = StandardScaler()
     panel_df[['education', 'age', 'owned_books', 'PKB_per_capita', 'log_income_deflated']] = scaler.fit_transform(panel_df[['education', 'age', 'owned_books', 'PKB_per_capita', 'log_income_deflated']])
+    
     # Nowy zestaw zmiennych
     X_vars = ["education", "owned_books", "gender", "age", "education_gender_interaction", "proffesion_gender_interaction", "age_education_interaction", "profession", "PKB_per_capita"]
     variability = check_variability(panel_df, "ANONID", X_vars)
@@ -556,16 +556,16 @@ elif menu == "Budowa modelu":
     X = panel_df[X_vars]
     X = add_constant(X)
     
-    # Model 1: Pooled OLS
+    # Pooled OLS
     pooled_model = PooledOLS(y, X).fit(cov_type='clustered', cluster_entity=True)
     
-    # Model 2: Random Effects (Efekty losowe)
+    # Random Effects (Efekty losowe)
     re_model = RandomEffects(y, X).fit(cov_type='clustered', cluster_entity=True)
     
-    # Model 3: Fixed Effects (Efekty ustalone - jednostkowe) z drop_absorbed=True
+    # Fixed Effects (Efekty ustalone - jednostkowe) z drop_absorbed=True
     fe_model = PanelOLS(y, X, entity_effects=True, drop_absorbed=True).fit(cov_type='clustered', cluster_entity=True)
     
-    # Model 4: Fixed Effects z efektami czasowymi (dwukierunkowy)
+    # Fixed Effects z efektami czasowymi (dwukierunkowy)
     fe_tw_model = PanelOLS(y, X, entity_effects=True, time_effects=True, drop_absorbed=True).fit(cov_type='clustered', cluster_entity=True)
     
     # Wyświetlenie wyników modeli
@@ -614,60 +614,11 @@ elif menu == "Budowa modelu":
 
     st.markdown("""
     ## Wprowadzenie
-    Poniżej przedstawiono analizę wyników modeli panelowych w odniesieniu do wykresów.
-
-    ---
-
-    ### Kluczowe punkty analizy:
-
-    #### 1. **R-squared i jakość dopasowania:**
-    - Modele oparte na efektach stałych (**Fixed Effects**) mają wyższe wartości \( R^2 \) w porównaniu do **Pooled OLS** i **Random Effects**.
-    - **Fixed Effects (2-way)** wykazuje najwyższe \( R^2 = 0.4176\), co sugeruje, że lepiej wyjaśnia zmienność dochodów w stosunku do pozostałych modeli.
-    - Wykresy pokazały dużą zmienność dochodów między zawodami, co jest zgodne z wynikami modelu Fixed Effects.
-
-    #### 2. **Wiek (age):**
-    - W modelach Fixed Effects wiek ma istotny wpływ na dochód (\( t = 5.1719 \) w modelu Fixed Effects (Entity)).
-    - Jest to zgodne z wykresami, które pokazały, że dochody rosną z wiekiem, osiągając szczyt w wieku średnim.
-    - Jednak wiek w modelach **Pooled OLS** i **Random Effects** jest mniej istotny (\( t = 1.2347 \)).
-
-    #### 3. **Edukacja (education):**
-    - Efekt edukacji jest ujemny i statystycznie istotny w większości modeli (\( t = -2.1357 \) w **Fixed Effects (Entity)**).
-    - Wynik ten jest zaskakujący, ponieważ na podstawie wykresów spodziewaliśmy się dodatniego wpływu edukacji na dochód. Może to sugerować, że edukacja koreluje z innymi zmiennymi, np. zawodami.
-
-    #### 4. **Interakcje (np. wiek x edukacja, zawód x płeć):**
-    - **Wiek x edukacja**: Wykazuje dodatni, ale słaby wpływ na dochód (np. \( t = 2.6822 \) w Random Effects).
-    - Zgodne z wykresami, gdzie widać, że starsze osoby z wyższym wykształceniem mogą mieć wyższe dochody.
-    - **Zawód x płeć**: Wpływ zależy od modelu – w **Fixed Effects (2-way)** efekt jest dodatni (\( t = 2.5480 \)).
-
-    #### 5. **Zawody (profession):**
-    - Zawody mają istotny wpływ na dochód, co potwierdzają zarówno wyniki modeli, jak i wykres pokazujący różnice między grupami zawodowymi.
-    - Wiele zawodów (np. \( profession.291.0, profession.292.0 \)) wykazuje ujemny wpływ na dochód (\( t < -2.0 \)).
-    - W modelu **Fixed Effects (2-way)** niektóre zawody zyskują dodatnie wartości (\( t > 2.5 \)).
-
-    #### 6. **PKB na mieszkańca (PKB_per_capita):**
-    - Ujemny wpływ PKB na mieszkańca jest istotny (\( t = -6.3242 \) w Fixed Effects (Entity)).
-    - Może to sugerować, że w regionach o wyższym PKB dochody indywidualne są mniej zróżnicowane.
-
-    ---
-
-    ### Podsumowanie:
-
-    1. **Zgodność z wykresami:**
-    - Modele potwierdzają wpływ wieku, zawodów i interakcji (wiek x edukacja) na dochody.
-    - Zawody odgrywają kluczową rolę w kształtowaniu dochodów.
-
-    2. **Niespójności:**
-    - Negatywny wpływ edukacji wymaga dokładniejszej analizy wielowymiarowej.
-
-    3. **Rekomendacje:**
-    - Uwzględnić dodatkowe zmienne (np. sektor zatrudnienia, region), aby lepiej zrozumieć wyniki.
-    - Skupić się na zbadaniu efektu zawodów i ich interakcji z płcią oraz edukacją.
+    Model jest raczej mierny w przewidywaniu dochodów. Zmienne, które zostały pobrane ze zbioru danych nie mają na tyle istotnego wpływu.
+    Mimo tego, że najlpesza jest regresja łącz
 
     """)
-        # Pobranie najlepszego modelu
-    # ... (istniejący kod do sekcji "Prezentacja i opis danych") ...
 
-    # Pobranie najlepszego modelu
     best_model = pooled_model  # Pooled OLS jako najlepszy model
 
     # Reszty modelu
@@ -723,34 +674,22 @@ elif menu == "Budowa modelu":
     plt.tight_layout()
     st.pyplot(fig)
 
-    # Wybór odpowiedniej korekty dla modelu
-    correction_type = None
     if p_value < 0.05 and bp_test[1] < 0.05:
         st.warning("Autokorelacja i heteroskedastyczność wykryte")
-        correction_type = 'kernel'
     elif p_value < 0.05:
         st.warning("Autokorelacja wykryta.")
-        correction_type = 'kernel'
     elif bp_test[1] < 0.05:
         st.warning("Heteroskedastyczność wykryta")
-        correction_type = 'robust'
         
     # Analiza wyników
     st.markdown("""
     ### Analiza wyników modelu ekonometrycznego
 
     #### 1. **Testy diagnostyczne**
-    - Test Wooldridge'a wskazuje na **{:.4f}** (p-wartość: {:.4f}), co oznacza {} autokorelację.
-    - Test Breuscha-Pagana wskazuje na **Chi2 = {:.4f}** (p-wartość: {:.4f}), co oznacza {} heteroskedastyczność.
+    - Test Wooldridge'a **{:.4f}** (p-wartość: {:.4f}), wykazuje {} autokorelację.
+    - Test Breuscha-Pagana **Chi2 = {:.4f}** (p-wartość: {:.4f}), wykazuje {} heteroskedastyczność.
     - Test Jarque-Bera: **Chi2 = {:.4f}**, p-wartość: {:.4f}, wskazuje {}, że reszty mają rozkład normalny.
 
-    #### 2. **Interpretacja wyników**
-    - Model {} korektę Driscoll-Kraay / White'a dla poprawności oszacowań.
-    - Wykresy diagnostyczne sugerują {}, czy reszty są zgodne z założeniami modelu.
-
-    #### 3. **Wnioski**
-    - Model pokazuje, że zmienne X mają istotny wpływ na zmienną zależną.
-    - Należy rozważyć dalsze korekty lub alternatywne modele, jeśli problemy diagnostyczne utrzymują się.
 
     """.format(test_stat, p_value, "wykryto" if p_value < 0.05 else "nie wykryto", 
                 bp_test[0], bp_test[1], "wykryto" if bp_test[1] < 0.05 else "nie wykryto", 
