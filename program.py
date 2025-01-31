@@ -31,11 +31,6 @@ def scatter_plot(data, x_var, y_var):
     st.pyplot(plt)
 
 def export_to_csv(data):
-    """
-    Eksportuje dane do pliku CSV i zwraca je jako obiekt do pobrania w Streamlit.
-    :param data: pandas.DataFrame zawierający dane do zapisania.
-    :return: Plik CSV w formie bajtów.
-    """
     if data.empty:
         st.warning("Brak danych do zapisania.")
         return None
@@ -62,8 +57,7 @@ def load_data():
             "WW01", "AGE1988"
 
     ]
-    
-    
+       
     # Sprawdź, czy wszystkie wymagane kolumny istnieją
     if not set(required_columns).issubset(data.columns):
         st.error("Brakuje wymaganych kolumn w danych.")
@@ -96,8 +90,8 @@ if 'X' not in st.session_state:
 
 if menu == "Wprowadzenie":
     st.title("Projekt zaliczeniowy: Ekonometria danych panelowych")
-    st.write("Autorzy: Jan Kowalski, Anna Nowak")
-    st.write("Data: 2025-01-24")
+    st.write("Prowadząca: Justyna Tora")
+    st.write("Autorzy: Natalia Łyś, Zuzanna Deszcz")
     st.header("Wprowadzenie")
     # Wprowadzenie w formacie Markdown
     st.markdown(
@@ -116,9 +110,7 @@ if menu == "Wprowadzenie":
         Dzięki **regularnym pomiarom co 5 lat**, POLPAN umożliwia śledzenie indywidualnych trajektorii życiowych i analizowanie długoterminowych trendów w społeczeństwie polskim.
    
         W ramach projektu POLPAN analizowaliśmy różne czynniki, które mają wpływ na poziom dochodów w Polsce. Badanie pozwala na identyfikację kluczowych determinant ekonomicznych, takich jak wykształcenie, doświadczenie zawodowe, płeć, pochodzenie społeczne czy dostęp do rynków pracy.
-
-        ---
-        ### Więcej informacji
+        Praca z danymi była bardzo długa i żmudna. Przejrzałyśmy wszystkie qwestionariusze na przestrzeni lat, która nie są storzone jednolicie i dopasowałyśmy odpowiedzi z akrusza do zmiennych w bazie danych.
         [Oficjalna strona POLPAN](https://polpan.org/en/)
         """,
         unsafe_allow_html=True
@@ -127,9 +119,8 @@ if menu == "Wprowadzenie":
 
 elif menu == "Prezentacja i opis danych":
     st.header("Prezentacja i opis danych")
-    
-   
 
+    st.write("Dane pozyskaniu interesujących nas kolumn ze zbioru danych zostały pobrane i to z takiego pomniejszonego zbioru danych korzystamy. Github nie pozwolił na przesłanie tak dużego pliku jak dane z POLPAN. Interesowali nas tylko i wyłącznie, Ci uczestnicy, którzy brali udział we wszystkich edycjach POLPAN. Daje to około 550 osób. Kolumny z brakami zostały usunięte.")
     if st.session_state['data'] is not None and not st.session_state['data'].empty:
         data = st.session_state['data']
         st.write("Podgląd danych:")
@@ -145,15 +136,10 @@ elif menu == "Prezentacja i opis danych":
  
         ]
         
-    
-        # Upewnij się, że wszystkie wymagane kolumny istnieją
         missing_columns = set(remaining_columns) - set(data.columns)
         if missing_columns:
             st.error(f"Brakuje następujących wymaganych kolumn: {missing_columns}")
             st.stop()
-            
-        
-
             
         mapa_wartosci_uk36 = {
         1: 10,
@@ -185,18 +171,12 @@ elif menu == "Prezentacja i opis danych":
         data['TK33'] = data['TK33'].map(mapa_wartosci_tk33).fillna(0)  
         
 
-        # Usuwanie kolumn
         data_cleaned = data[remaining_columns].copy()
-
-        # Eksport danych
         data_cleaned.dropna(inplace=True)
         
-        # Zakładamy, że masz już DataFrame `panel_df` z kolumną `AGE1988`
 
         # Lista lat, dla których chcemy stworzyć kolumny z wiekiem
         years = [1993, 1998, 2003, 2008, 2013, 2018]
-
-        # Tworzymy nowe kolumny z wiekiem dla każdego roku
         for year in years:
             data_cleaned[f'AGE{year}'] = data_cleaned['AGE1988'] + (year - 1988)
 
@@ -278,7 +258,7 @@ elif menu == "Prezentacja i opis danych":
             },
         }
 
-        # 2. Funkcja, która konwertuje dane "szerokie" do formatu panelowego
+        #  konwertuje dane "szerokie" do formatu panelowego
         def convert_to_panel(df_wide, mapping_dict):
             df_list = []
 
@@ -320,15 +300,13 @@ elif menu == "Prezentacja i opis danych":
 
             return panel_data
 
-        # 3. Wywołanie funkcji i wyświetlenie efektu
         # Zamiana na długie (panel)
         data_cleaned = convert_to_panel(data_cleaned, mappings)
         panel_df = data_cleaned.copy()
         
-        # Interakcja między edukacją a płcią
+        # Interakcje
         panel_df['education_gender_interaction'] = panel_df['education'] * panel_df['gender']
         panel_df['proffesion_gender_interaction'] = panel_df['profession'] * panel_df['gender']
-        # Interakcja wiek × wykształcenie
         panel_df['age_education_interaction'] = panel_df['age'] * panel_df['education']  
 
         ### Inflacja 
@@ -342,7 +320,7 @@ elif menu == "Prezentacja i opis danych":
         inflacja_df = pd.DataFrame(list(inflacja.items()), columns=['Rok', 'Inflacja'])
 
         # Obliczenie indeksu cenowego (CPI) z bazowym rokiem 2018
-        inflacja_df['CPI'] = 1.0  # Inicjalizacja kolumny CPI
+        inflacja_df['CPI'] = 1.0  
         for i in range(1, len(inflacja_df)):
             inflacja_df.loc[i, 'CPI'] = inflacja_df.loc[i - 1, 'CPI'] * (inflacja_df.loc[i, 'Inflacja'] / 100)
 
@@ -410,9 +388,9 @@ elif menu == "Prezentacja i opis danych":
 
         st.dataframe(pkb_df)
         
-         # Dane PKB per capita dla Polski
+        # Dane PKB per capita dla Polski
         pkb_data = {
-            "wave": [1988, 1993, 1998, 2003, 2008, 2013, 2018],  # Używamy 'wave' zamiast 'Rok'
+            "wave": [1988, 1993, 1998, 2003, 2008, 2013, 2018],  
             "PKB_per_capita": [12809.89, 12551.76, 17540.15, 20859.80, 28495.91, 34323.58, 43585.12]
         }
 
@@ -425,6 +403,7 @@ elif menu == "Prezentacja i opis danych":
         
         
         st.subheader("Dane panelowe:")
+        st.write("Dane przekształcone na dane panelowe.")
         st.dataframe(panel_df)
 
         st.write(f"Wierszy: {panel_df.shape[0]}, Kolumn: {panel_df.shape[1]}")
@@ -464,20 +443,14 @@ elif menu == "Prezentacja i opis danych":
         # Store panel_df w session_state dla innych sekcji
         st.session_state['panel_df'] = panel_df
 
-        st.header("Statystyki opisowe")
         panel_df["profession"] = panel_df["profession"].astype("category")
         panel_df["gender"] = panel_df["gender"].astype("category")
 
         # Logarytmowanie dochodu
-        panel_df['log_income_deflated'] = np.log(panel_df['income_deflated'] + 1)  # +1, aby uniknąć log(0)
+        panel_df['log_income_deflated'] = np.log(panel_df['income_deflated'] + 1) 
     
-
-        # Wyświetlamy statystyki opisowe dla wybranych kolumn numerycznych
-        numeric_cols = ["income", "education", "owned_books", "age","PKB_per_capita"]  # Dopasuj do potrzeb
-        st.write(panel_df[numeric_cols].describe())
-
-        st.write("---")
-        st.header("2. Histogram wybranej zmiennej")
+        
+        st.header("Histogram wybranej zmiennej")
 
         # Wybór zmiennej do histogramu
         var_for_hist = st.selectbox("Wybierz zmienną do analizy rozkładu:",
@@ -501,7 +474,7 @@ elif menu == "Prezentacja i opis danych":
             )
         st.plotly_chart(fig_hist)
 
-        st.write("---")
+ 
         st.header("Trend w czasie / Fale badania")
 
         # Przykład: średni dochód per fala
