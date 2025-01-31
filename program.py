@@ -77,7 +77,7 @@ st.sidebar.title("Nawigacja")
 menu = st.sidebar.radio("Wybierz sekcję:", [
     "Wprowadzenie",
     "Prezentacja i opis danych",
-    "Budowa modelu"
+    "Budowa, weryfikacja i podsumwoanie modelu"
 ])
 
 # Globalne zmienne
@@ -108,7 +108,7 @@ if menu == "Wprowadzenie":
         Dzięki **regularnym pomiarom co 5 lat**, POLPAN umożliwia śledzenie indywidualnych trajektorii życiowych i analizowanie długoterminowych trendów w społeczeństwie polskim.
    
         W ramach projektu POLPAN analizowaliśmy różne czynniki, które mają wpływ na poziom dochodów w Polsce. Badanie pozwala na identyfikację kluczowych determinant ekonomicznych, takich jak wykształcenie, doświadczenie zawodowe, płeć, pochodzenie społeczne czy dostęp do rynków pracy.
-        Praca z danymi była bardzo długa i żmudna. Przejrzałyśmy wszystkie qwestionariusze na przestrzeni lat, która nie są storzone jednolicie i dopasowałyśmy odpowiedzi z akrusza do zmiennych w bazie danych.
+        Praca z danymi była bardzo długa i żmudna. Przejrzałyśmy wszystkie kwestionariusze na przestrzeni lat, która nie są storzone jednolicie i dopasowałyśmy odpowiedzi z akrusza do zmiennych w bazie danych.
         [Oficjalna strona POLPAN](https://polpan.org/en/)
         """,
         unsafe_allow_html=True
@@ -523,7 +523,7 @@ elif menu == "Prezentacja i opis danych":
         st.write("Dochody różnią się istotnie w zależności od grup zawodowych. Grupy o kodzie zbliżonym do 5000 wydają się mieć największy potencjał do wysokich dochodów. Rozrzut w niektórych zawodach sugeruje dużą różnorodność w wynagrodzeniach, co może być związane z różnymi poziomami stanowisk w danej grupie zawodowej.")
         st.session_state['data_cleaned'] = data_cleaned
 
-elif menu == "Budowa modelu":
+elif menu == "Budowa, weryfikacja i podsumwoanie modelu":
     st.header("Budowa modelu")
     panel_df = st.session_state['panel_df']
 
@@ -685,7 +685,7 @@ elif menu == "Budowa modelu":
     st.markdown("""
     ### Analiza wyników modelu ekonometrycznego
 
-    #### 1. **Testy diagnostyczne**
+    #### **Testy diagnostyczne**
     - Test Wooldridge'a **{:.4f}** (p-wartość: {:.4f}), wykazuje {} autokorelację.
     - Test Breuscha-Pagana **Chi2 = {:.4f}** (p-wartość: {:.4f}), wykazuje {} heteroskedastyczność.
     - Test Jarque-Bera: **Chi2 = {:.4f}**, p-wartość: {:.4f}, wskazuje {}, że reszty mają rozkład normalny.
@@ -694,6 +694,5 @@ elif menu == "Budowa modelu":
     """.format(test_stat, p_value, "wykryto" if p_value < 0.05 else "nie wykryto", 
                 bp_test[0], bp_test[1], "wykryto" if bp_test[1] < 0.05 else "nie wykryto", 
                 jb_test[0], jb_test[1], "sugeruje" if jb_test[1] > 0.05 else "nie sugeruje", 
-                "wymaga" if correction_type else "nie wymaga", 
                 "poprawne" if jb_test[1] > 0.05 else "niepoprawne"))
 
