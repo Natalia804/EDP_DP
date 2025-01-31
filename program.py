@@ -403,7 +403,7 @@ elif menu == "Prezentacja i opis danych":
         
         
         st.subheader("Dane panelowe:")
-        st.write("Dane przekształcone na dane panelowe.")
+        st.write("Dane przekształcone do formatu danych panelych. Wiersze z brakującymi wartościami zostały usunięte.")
         st.dataframe(panel_df)
 
         st.write(f"Wierszy: {panel_df.shape[0]}, Kolumn: {panel_df.shape[1]}")
@@ -443,12 +443,17 @@ elif menu == "Prezentacja i opis danych":
         # Store panel_df w session_state dla innych sekcji
         st.session_state['panel_df'] = panel_df
 
+        st.header("Statystyki opisowe")
         panel_df["profession"] = panel_df["profession"].astype("category")
         panel_df["gender"] = panel_df["gender"].astype("category")
 
         # Logarytmowanie dochodu
         panel_df['log_income_deflated'] = np.log(panel_df['income_deflated'] + 1) 
     
+
+        # Wyświetlamy statystyki opisowe dla wybranych kolumn numerycznych
+        numeric_cols = ["income", "education", "owned_books", "age","PKB_per_capita"] 
+        st.write(panel_df[numeric_cols].describe())
         
         st.header("Histogram wybranej zmiennej")
 
