@@ -5,3 +5,12 @@ linearmodels==6.1
 matplotlib>=3.0.0
 seaborn>=0.10.0
 plotly>=5.0.0
+treamlit
+pandas
+numpy
+scipy
+sklearn
+io
+csv
+os
+
