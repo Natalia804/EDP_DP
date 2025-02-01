@@ -77,7 +77,8 @@ st.sidebar.title("Nawigacja")
 menu = st.sidebar.radio("Wybierz sekcję:", [
     "Wprowadzenie",
     "Prezentacja i opis danych",
-    "Budowa, weryfikacja i podsumwoanie modelu"
+    "Budowa, weryfikacja i podsumwoanie modelu",
+    "Podsumowanie"
 ])
 
 # Globalne zmienne
@@ -689,10 +690,47 @@ elif menu == "Budowa, weryfikacja i podsumwoanie modelu":
     - Test Wooldridge'a **{:.4f}** (p-wartość: {:.4f}), wykazuje {} autokorelację.
     - Test Breuscha-Pagana **Chi2 = {:.4f}** (p-wartość: {:.4f}), wykazuje {} heteroskedastyczność.
     - Test Jarque-Bera: **Chi2 = {:.4f}**, p-wartość: {:.4f}, wskazuje {}, że reszty mają rozkład normalny.
-
-
     """.format(test_stat, p_value, "wykryto" if p_value < 0.05 else "nie wykryto", 
                 bp_test[0], bp_test[1], "wykryto" if bp_test[1] < 0.05 else "nie wykryto", 
                 jb_test[0], jb_test[1], "sugeruje" if jb_test[1] > 0.05 else "nie sugeruje", 
                 "poprawne" if jb_test[1] > 0.05 else "niepoprawne"))
+    
+    st.markdown("""Współczynnik determinacji jest niski, model nie przeszedł testów ani normalności, ani autokorelacji składnika losowego, ani heteroskedastyczności składnika losowego.
+    Kierunek badań nie wykazał wyników, które mogłby być interesujące
+    """)
+elif menu == "Podsumowanie":
+    st.markdown("""
+# Podsumowanie
+
+### **Cel analizy**
+Celem pracy była analiza danych panelowych **POLPAN**, obejmująca wpływ wykształcenia, wieku, zawodu i innych czynników na poziom dochodów w Polsce.
+
+### **Przetwarzanie danych**
+- Wykorzystano dane od osób, które uczestniczyły we wszystkich falach badania.
+- Ujednolicono zmienne, usunięto braki danych.
+- Dochody zostały skorygowane o inflację (CPI).
+- Dane przekształcono do formatu panelowego.
+
+### **Modele ekonometryczne**
+Porównano cztery modele:
+- **Pooled OLS**
+- **Random Effects**
+- **Fixed Effects (FE)**
+- **Fixed Effects z efektami czasowymi**
+
+Testy Breusch-Pagana i Hausmana wskazały na przewagę modelu **FE z efektami czasowymi**.
+
+### **Wnioski**
+- **Wpływ wykształcenia**: dochód wzrasta wraz z poziomem edukacji.
+- **Efekt wieku**: dochód rośnie do pewnego momentu, potem spada.
+- **Różnice płciowe**: kobiety średnio zarabiają mniej niż mężczyźni.
+
+### **Problemy modelu**
+- Niska wartość \( R^2 \) – model słabo tłumaczy zmienność dochodów.
+- Wykryto **autokorelację** i **heteroskedastyczność** reszt.
+- Model nie przeszedł testu normalności Jarque-Bera.
+
+### **Podsumowanie**
+Przeprowadzona analiza potwierdziła wpływ edukacji i wieku na dochody, jednak modele miały liczne ograniczenia. Niezbędne są dalsze badania z większą liczbą zmiennych oraz poprawą specyfikacji modelu.
+""")
 
