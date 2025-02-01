@@ -92,7 +92,6 @@ if menu == "Wprowadzenie":
     st.write("Prowadząca: Justyna Tora")
     st.write("Autorzy: Natalia Łyś, Zuzanna Deszcz")
     st.header("Wprowadzenie")
-    # Wprowadzenie w formacie Markdown
     st.markdown(
         """
         ## Polskie Badanie Panelowe (POLPAN)
@@ -183,7 +182,7 @@ elif menu == "Prezentacja i opis danych":
         st.write("Dane z nowymi kolumnami wieku:")
         st.dataframe(data_cleaned.head())
 
-        # 1. Zdefiniuj mapowanie kolumn -> poszczególne lata
+        # Mapowanie kolumn -> poszczególne lata
         mappings = {
             1988: {
                 "wave_col": "WAVE1988",
@@ -275,7 +274,7 @@ elif menu == "Prezentacja i opis danych":
                     cols["age"]
                 ]].copy()
 
-                # Zmień nazwy, aby je ujednolicić
+                # Ujednolicone nazwy
                 sub_df.rename(columns={
                     cols["wave_col"]: "wave_indicator",
                     cols["income_col"]: "income",
@@ -287,14 +286,13 @@ elif menu == "Prezentacja i opis danych":
                     cols["age"] : "age"
                 }, inplace=True)
 
-                # Dodaj kolumnę z rokiem
                 sub_df["wave"] = year
 
                 df_list.append(sub_df)
 
-            # Połącz wszystkie 'sub_df' w jeden DataFrame
+            # 'sub_df' w jeden DataFrame
             panel_data = pd.concat(df_list, ignore_index=True)
-            # Posortuj wg ANONID i wave
+            # Sort wg ANONID i wave
             panel_data.sort_values(by=["ANONID", "wave"], inplace=True)
 
             return panel_data
@@ -354,7 +352,6 @@ elif menu == "Prezentacja i opis danych":
         unsafe_allow_html=True
         )
         
-        # Sprawdź wynik
         st.write("Dane z deflowanym dochodem:")
         
         st.dataframe(panel_df[['wave', 'income', 'CPI', 'income_deflated']].head())
@@ -707,7 +704,7 @@ Natomiast z testów wynika, że najlepszy jest Pooled OLS. Żaden model się nie
                 "poprawne" if jb_test[1] > 0.05 else "niepoprawne"))
     
     st.markdown("""Współczynnik determinacji jest niski, model nie przeszedł testów ani normalności, ani autokorelacji składnika losowego, ani heteroskedastyczności składnika losowego.
-    Kierunek badań nie wykazał wyników, które mogłby być interesujące
+    Kierunek badań nie wykazał wyników, które mogłby być interesujące.
     """)
 elif menu == "Podsumowanie":
     st.markdown("""
