@@ -615,8 +615,19 @@ elif menu == "Budowa, weryfikacja i podsumwoanie modelu":
 
     st.markdown("""
     ## Wprowadzenie
-    Model jest raczej mierny w przewidywaniu dochodów. Zmienne, które zostały pobrane ze zbioru danych nie mają na tyle istotnego wpływu.
-    Mimo tego, że najlpesza jest regresja łącz
+    
+### **Ocena dopasowania modeli**
+- **Fixed Effects (2-way)** osiąga najwyższą wartość R² (0.4176), co sugeruje, że najlepiej wyjaśnia zmienność dochodów.
+- **Fixed Effects** również uzyskuje wyższe R² (0.3915) niż modele **Pooled OLS** i **Random Effects** (0.3563).
+- **Random Effects** i **Pooled OLS** dają identyczne wyniki, co sugeruje brak istotnych efektów losowych.
+Natomiast z testów wynika, że najlepszy jest Pooled OLS. Żaden model się nie nadaje do wyjaśnienia zmiennej Dochody.
+
+### **Wpływ zmiennych**
+- **Wykształcenie** negatywnie wpływa na logarytm dochodu w każdym modelu, ale w modelach **FE** i **FE (2-way)** efekt ten jest mniej istotny.
+- **Liczba posiadanych książek** nie ma istotnego wpływu na dochód w żadnym modelu.
+- **Wiek** jest istotny tylko w modelach **Fixed Effects** – wyższy wiek zwiększa dochody.
+- **Interakcje płci i edukacji** są istotne tylko w modelu **FE**.
+- **PKB per capita** ma istotny, ale negatywny wpływ na dochód.
 
     """)
 
@@ -718,7 +729,7 @@ Porównano cztery modele:
 - **Fixed Effects (FE)**
 - **Fixed Effects z efektami czasowymi**
 
-Testy Breusch-Pagana i Hausmana wskazały na przewagę modelu **FE z efektami czasowymi**.
+Testy wykazały przewagę modelu Pooles OLS
 
 ### **Wnioski**
 - **Wpływ wykształcenia**: dochód wzrasta wraz z poziomem edukacji.
@@ -727,10 +738,10 @@ Testy Breusch-Pagana i Hausmana wskazały na przewagę modelu **FE z efektami cz
 
 ### **Problemy modelu**
 - Niska wartość \( R^2 \) – model słabo tłumaczy zmienność dochodów.
-- Wykryto **autokorelację** i **heteroskedastyczność** reszt.
+- Wykryto **autokorelację** i **heteroskedastyczność** reszt, więc na modelu nie można budować wniosków.
 - Model nie przeszedł testu normalności Jarque-Bera.
 
 ### **Podsumowanie**
-Przeprowadzona analiza potwierdziła wpływ edukacji i wieku na dochody, jednak modele miały liczne ograniczenia. Niezbędne są dalsze badania z większą liczbą zmiennych oraz poprawą specyfikacji modelu.
+Przeprowadzona analiza potwierdziła wpływ edukacji i wieku na dochody, jednak modele miały liczne ograniczenia. 
 """)
 
